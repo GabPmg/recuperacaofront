@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, TouchableOpacity, Image, Text, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
 import { TextInput as PaperInput, Card } from 'react-native-paper';
 
 export default function App() {
   const [products, setProducts] = useState([]);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(''); 
   const [description, setDescription] = useState('');
   const [quantity, setQuantity] = useState('');
   const [photo, setPhoto] = useState(null);
-  const [editingProduct, setEditingProduct] = useState(null); 
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/products');
+      const response = await axios.get('https://recuperacao-6nur.onrender.com/products/');
       setProducts(response.data);
     } catch (error) {
       console.error(error);
@@ -26,16 +25,18 @@ export default function App() {
 
     try {
       if (editingProduct) {
-        await axios.put(`http://localhost:5000/products/${editingProduct.id}`, productData);
+        await axios.put(`https://recuperacao-6nur.onrender.com/products/${editingProduct._id}`, productData);
       } else {
-        await axios.post('http://localhost:5000/products', productData);
+        await axios.post('https://recuperacao-6nur.onrender.com/products/', productData);
       }
+
       setName('');
       setDescription('');
       setQuantity('');
       setPhoto(null);
-      setEditingProduct(null); 
-      fetchProducts(); 
+      setEditingProduct(null);
+      
+      fetchProducts();
     } catch (error) {
       console.error(error);
     }
@@ -47,11 +48,12 @@ export default function App() {
       'Você tem certeza que deseja excluir este produto?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Excluir', 
+        {
+          text: 'Excluir',
           onPress: async () => {
             try {
-              fetchProducts(); 
+              await axios.delete(`https://recuperacao-6nur.onrender.com/products/${productId}`);
+              fetchProducts();
             } catch (error) {
               console.error(error);
             }
@@ -59,20 +61,6 @@ export default function App() {
         },
       ]
     );
-  };
-
-  const handleImagePick = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted) {
-      const pickerResult = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      });
-
-      if (!pickerResult.canceled) {
-        setPhoto(pickerResult.uri);
-      }
-    }
   };
 
   useEffect(() => {
@@ -102,14 +90,17 @@ export default function App() {
         keyboardType="numeric"
         style={styles.input}
       />
-      <Button title="Selecionar Foto" onPress={handleImagePick} />
-      {photo && <Image source={{ uri: photo }} style={styles.imagePreview} />}
-
+      <PaperInput
+        label="URL da Imagem"
+        value={photo}
+        onChangeText={setPhoto}
+        style={styles.input}
+      />
       <Button title={editingProduct ? "Atualizar Produto" : "Adicionar Produto"} onPress={handleSubmit} />
 
       <FlatList
         data={products}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item._id.toString()}
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <Text style={styles.productName}>{item.name}</Text>
@@ -120,11 +111,11 @@ export default function App() {
               <Button title="Editar" onPress={() => {
                 setName(item.name);
                 setDescription(item.description);
-                setQuantity(item.quantity.toString());
+                setQuantity(item.quantity);
                 setPhoto(item.photo);
                 setEditingProduct(item);
               }} />
-              <Button title="Deletar" onPress={() => handleDelete(item.id)} />
+              <Button title="Deletar" onPress={() => handleDelete(item._id)} />
             </View>
           </Card>
         )}
@@ -139,16 +130,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
+    marginTop: 20,
+    textAlign: "center",
     fontSize: 24,
     marginBottom: 20,
   },
   input: {
     marginBottom: 10,
-  },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    marginVertical: 10,
   },
   card: {
     marginBottom: 15,
@@ -161,6 +149,7 @@ const styles = StyleSheet.create({
   productImage: {
     width: 100,
     height: 100,
+    marginHorizontal:"auto",
     resizeMode: 'contain',
   },
   actionsContainer: {

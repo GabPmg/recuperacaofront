@@ -84,7 +84,7 @@ const ProductScreen = () => {
             </TouchableOpacity>
           </View>
         )}
-        keyExtractor={(item) => item._id.toString()}
+        keyExtractor={(item) => item._id}
       />
 
       <View style={{ marginTop: 20 }}>
