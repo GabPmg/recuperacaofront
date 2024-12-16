@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, TouchableOpacity, Image, Text, Alert, StyleSheet } from 'react-native';
+import { View, Button, FlatList, Image, Text, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { TextInput as PaperInput, Card } from 'react-native-paper';
 
